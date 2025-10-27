@@ -63,6 +63,9 @@ setScheme s _ = Right . {scheme := fromString s}
 setBootstrap : Bool -> AdjConf
 setBootstrap b _ = Right . {bootstrap := b}
 
+setRebuildBootstrap : Bool -> AdjConf
+setRebuildBootstrap b _ = Right . {rebuildBootstrap := b}
+
 setRlwrap : Maybe String -> AdjConf
 setRlwrap args _ = Right . {rlwrap := UseRlwrap $ maybe [] (\s => [NoEscape s]) args}
 
@@ -172,6 +175,16 @@ descs =
       Use an existing version of Idris2 when building the compiler.
       This will fail if `idris2` is not on the computer's `$PATH` or
       is too old to build the current version of the compiler.
+      """
+  , MkOpt [] ["rebuild-bootstrap"]   (NoArg $ setRebuildBootstrap True)
+      """
+      After bootstrapping, rebuild Idris2 using the freshly built compiler.
+      This performs a stage-2 build, producing a more optimized final executable.
+      """
+  , MkOpt [] ["no-rebuild-bootstrap"]   (NoArg $ setRebuildBootstrap False)
+      """
+      Skip the stage-2 rebuild after bootstrapping. This results in a slightly
+      less optimized compiler, but reduces total build time.
       """
   , MkOpt [] ["warn-depends"]   (NoArg $ setWarnDepends True)
       """

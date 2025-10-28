@@ -283,6 +283,8 @@ bootstrapIdris = do
       debug "Rebuilding bootstrap libraries..."
       sysAndLog Build ["make", "bootstrap-libs", "PREFIX=bootstrapped", schemeVar]
       sysAndLog Build ["make", "bootstrap-install", "PREFIX=bootstrapped", schemeVar]
+      sysAndLog Build ["make", "support", "PREFIX=bootstrapped", schemeVar]
+      sysAndLog Build ["make", "install-support", "PREFIX=bootstrapped", schemeVar]
       sysAndLog Build ["make", "clean"]
       debug "Stage 3: Rebuilding Idris..."
       sysAndLog Build ["make", "idris2-exec", prefixVar, "IDRIS2_BOOT=bootstrapped/bin/idris2", schemeVar]

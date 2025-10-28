@@ -274,22 +274,22 @@ idrisCleanup =
     sysAndLog Build ["make", "clean-libs"]
     sysAndLog Build ["rm", "-r", "build/ttc", "build/exec"]
 
-bootstrapIdris : HasIO io => (e : Env) => EitherT PackErr io ()
-bootstrapIdris = do
+bootstrapIdris : HasIO io => (e : Env) => Path Abs -> EitherT PackErr io ()
+bootstrapIdris dir = do
   debug "Bootstrapping Idris..."
   sysAndLog Build ["make", bootstrapCmd, schemeVar]
   if e.config.rebuildBootstrap
      then do
       debug "Rebuilding bootstrap libraries..."
-      sysAndLog Build ["make", "bootstrap-libs", "PREFIX=bootstrapped", schemeVar]
-      sysAndLog Build ["make", "bootstrap-install", "PREFIX=bootstrapped", schemeVar]
-      sysAndLog Build ["make", "support", "PREFIX=bootstrapped", schemeVar]
-      sysAndLog Build ["make", "install-support", "PREFIX=bootstrapped", schemeVar]
+      sysAndLog Build ["make", "bootstrap-libs", "PREFIX=\{dir}/bootstrapped", schemeVar]
+      sysAndLog Build ["make", "bootstrap-install", "PREFIX=\{dir}/bootstrapped", schemeVar]
+      sysAndLog Build ["make", "support", "PREFIX=\{dir}/bootstrapped", schemeVar]
+      sysAndLog Build ["make", "install-support", "PREFIX=\{dir}/bootstrapped", schemeVar]
       sysAndLog Build ["make", "clean"]
       debug "Stage 3: Rebuilding Idris..."
       sysAndLog Build ["make", "idris2-exec", prefixVar,
-                               "IDRIS2_BOOT=bootstrapped/bin/idris2",
-                               "IDRIS2_DATA=bootstrapped/idris2-0.7.0/support",
+                               "IDRIS2_BOOT=\{dir}/bootstrapped/bin/idris2",
+                               "IDRIS2_DATA=\{dir}/bootstrapped/idris2-0.7.0/support",
                                schemeVar]
      else pure ()
 
@@ -304,7 +304,7 @@ mkIdris = do
     debug "No Idris compiler found. Installing..."
     withCoreGit $ \dir => do
       case e.config.bootstrap of
-        True  => bootstrapIdris
+        True  => bootstrapIdris dir
         False =>
           -- if building with an existing installation fails for whatever reason
           -- we revert to bootstrapping
@@ -312,7 +312,7 @@ mkIdris = do
             Left x => do
               warn "Building Idris failed. Trying to bootstrap now."
               idrisCleanup
-              bootstrapIdris
+              bootstrapIdris dir
             Right () => pure ()
 
       sysAndLog Build ["make", "install-support", prefixVar]

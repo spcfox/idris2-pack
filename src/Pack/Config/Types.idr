@@ -181,6 +181,9 @@ record Config_ (f : Type -> Type) (c : Type) where
   ||| Whether to bootstrap when building Idris2
   bootstrap    : f Bool
 
+  ||| Whether to rebuild Idris2 after bootstrapping
+  rebuildBootstrap : f Bool
+
   ||| Whether to prompt for a confirmation when
   ||| building or installing a package with custom
   ||| build or install hooks.
@@ -336,36 +339,37 @@ mergeRight = mergeWith (\_,v => v)
 export
 init : (cur : CurDir) => (coll : DBName) -> MetaConfig
 init coll = MkConfig {
-    collection      = coll
-  , idrisURL        = Nothing
-  , idrisCommit     = Nothing
-  , allIdrisCommits = []
-  , packURL         = Nothing
-  , packCommit      = Nothing
-  , scheme          = "scheme"
-  , bootstrap       = True
-  , safetyPrompt    = True
-  , gcPrompt        = True
-  , gcPurge         = False
-  , warnDepends     = True
-  , skipTests       = False
-  , whitelist       = ["pack", "idris2-lsp"]
-  , withSrc         = True
-  , withDocs        = False
-  , useKatla        = False
-  , withIpkg        = Search cur
-  , rlwrap          = DoNotUseRlwrap
-  , extraArgs       = []
-  , autoLibs        = []
-  , autoApps        = []
-  , autoLoad        = NoPkgs
-  , custom          = empty
-  , queryType       = NameOnly
-  , logLevel        = Warning
-  , codegen         = Default
-  , output          = "_tmppack"
-  , levels          = empty
-  , gitInit         = False
+    collection       = coll
+  , idrisURL         = Nothing
+  , idrisCommit      = Nothing
+  , allIdrisCommits  = []
+  , packURL          = Nothing
+  , packCommit       = Nothing
+  , scheme           = "scheme"
+  , bootstrap        = True
+  , rebuildBootstrap = False
+  , safetyPrompt     = True
+  , gcPrompt         = True
+  , gcPurge          = False
+  , warnDepends      = True
+  , skipTests        = False
+  , whitelist        = ["pack", "idris2-lsp"]
+  , withSrc          = True
+  , withDocs         = False
+  , useKatla         = False
+  , withIpkg         = Search cur
+  , rlwrap           = DoNotUseRlwrap
+  , extraArgs        = []
+  , autoLibs         = []
+  , autoApps         = []
+  , autoLoad         = NoPkgs
+  , custom           = empty
+  , queryType        = NameOnly
+  , logLevel         = Warning
+  , codegen          = Default
+  , output           = "_tmppack"
+  , levels           = empty
+  , gitInit          = False
   }
 
 export infixl 7 `update`
@@ -374,36 +378,37 @@ export infixl 7 `update`
 export
 update : IConfig c -> MConfig c -> IConfig c
 update ci cm = MkConfig {
-    collection      = fromMaybe ci.collection cm.collection
-  , idrisURL        = cm.idrisURL <|> ci.idrisURL
-  , idrisCommit     = cm.idrisCommit <|> ci.idrisCommit
-  , allIdrisCommits = cm.allIdrisCommits <+> ci.allIdrisCommits
-  , packURL         = cm.packURL <|> ci.packURL
-  , packCommit      = cm.packCommit <|> ci.packCommit
-  , scheme          = fromMaybe ci.scheme cm.scheme
-  , bootstrap       = fromMaybe ci.bootstrap cm.bootstrap
-  , safetyPrompt    = fromMaybe ci.safetyPrompt cm.safetyPrompt
-  , gcPrompt        = fromMaybe ci.gcPrompt cm.gcPrompt
-  , gcPurge         = fromMaybe ci.gcPrompt cm.gcPrompt
-  , warnDepends     = fromMaybe ci.warnDepends cm.warnDepends
-  , skipTests       = fromMaybe ci.warnDepends cm.warnDepends
-  , withSrc         = fromMaybe ci.withSrc cm.withSrc
-  , withDocs        = fromMaybe ci.withDocs cm.withDocs
-  , useKatla        = fromMaybe ci.useKatla cm.useKatla
-  , withIpkg        = fromMaybe ci.withIpkg cm.withIpkg
-  , rlwrap          = fromMaybe ci.rlwrap cm.rlwrap
-  , extraArgs       = ci.extraArgs <+> fromMaybe [] cm.extraArgs
-  , whitelist       = sortedNub (ci.whitelist ++ concat cm.whitelist)
-  , autoLibs        = sortedNub (ci.autoLibs ++ concat cm.autoLibs)
-  , autoApps        = sortedNub (ci.autoApps ++ concat cm.autoApps)
-  , autoLoad        = fromMaybe ci.autoLoad cm.autoLoad
-  , custom          = mergeWith mergeRight ci.custom (fromMaybe empty cm.custom)
-  , queryType       = fromMaybe ci.queryType cm.queryType
-  , logLevel        = fromMaybe ci.logLevel cm.logLevel
-  , codegen         = fromMaybe ci.codegen cm.codegen
-  , output          = fromMaybe ci.output cm.output
-  , levels          = mergeWith (\_,v => v) ci.levels (fromMaybe empty cm.levels)
-  , gitInit         = fromMaybe ci.gitInit cm.gitInit
+    collection       = fromMaybe ci.collection cm.collection
+  , idrisURL         = cm.idrisURL <|> ci.idrisURL
+  , idrisCommit      = cm.idrisCommit <|> ci.idrisCommit
+  , allIdrisCommits  = cm.allIdrisCommits <+> ci.allIdrisCommits
+  , packURL          = cm.packURL <|> ci.packURL
+  , packCommit       = cm.packCommit <|> ci.packCommit
+  , scheme           = fromMaybe ci.scheme cm.scheme
+  , bootstrap        = fromMaybe ci.bootstrap cm.bootstrap
+  , rebuildBootstrap = fromMaybe ci.rebuildBootstrap cm.rebuildBootstrap
+  , safetyPrompt     = fromMaybe ci.safetyPrompt cm.safetyPrompt
+  , gcPrompt         = fromMaybe ci.gcPrompt cm.gcPrompt
+  , gcPurge          = fromMaybe ci.gcPrompt cm.gcPrompt
+  , warnDepends      = fromMaybe ci.warnDepends cm.warnDepends
+  , skipTests        = fromMaybe ci.warnDepends cm.warnDepends
+  , withSrc          = fromMaybe ci.withSrc cm.withSrc
+  , withDocs         = fromMaybe ci.withDocs cm.withDocs
+  , useKatla         = fromMaybe ci.useKatla cm.useKatla
+  , withIpkg         = fromMaybe ci.withIpkg cm.withIpkg
+  , rlwrap           = fromMaybe ci.rlwrap cm.rlwrap
+  , extraArgs        = ci.extraArgs <+> fromMaybe [] cm.extraArgs
+  , whitelist        = sortedNub (ci.whitelist ++ concat cm.whitelist)
+  , autoLibs         = sortedNub (ci.autoLibs ++ concat cm.autoLibs)
+  , autoApps         = sortedNub (ci.autoApps ++ concat cm.autoApps)
+  , autoLoad         = fromMaybe ci.autoLoad cm.autoLoad
+  , custom           = mergeWith mergeRight ci.custom (fromMaybe empty cm.custom)
+  , queryType        = fromMaybe ci.queryType cm.queryType
+  , logLevel         = fromMaybe ci.logLevel cm.logLevel
+  , codegen          = fromMaybe ci.codegen cm.codegen
+  , output           = fromMaybe ci.output cm.output
+  , levels           = mergeWith (\_,v => v) ci.levels (fromMaybe empty cm.levels)
+  , gitInit          = fromMaybe ci.gitInit cm.gitInit
   }
 
 --------------------------------------------------------------------------------

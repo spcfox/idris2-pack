@@ -287,8 +287,13 @@ bootstrapIdris = do
       sysAndLog Build ["make", "install-support", "PREFIX=bootstrapped", schemeVar]
       sysAndLog Build ["make", "clean"]
       debug "Stage 3: Rebuilding Idris..."
-      sysAndLog Build ["make", "idris2-exec", prefixVar, "IDRIS2_BOOT=bootstrapped/bin/idris2", schemeVar]
+      sysAndLog Build ["make", "idris2-exec", prefixVar,
+                               "IDRIS2_BOOT=bootstrapped/bin/idris2",
+                               "IDRIS2_DATA=bootstrapped/idris2-0.7.0/support",
+                               schemeVar]
      else pure ()
+
+  sysAndLog Build ["make", "bootstrap-clean"]
 
 ||| Builds and installs the Idris commit given in the environment.
 export covering

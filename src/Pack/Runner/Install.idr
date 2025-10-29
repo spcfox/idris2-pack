@@ -269,7 +269,10 @@ tryDirectBuild =
     sysAndLog Build ["make", "idris2-exec" , schemeVar]
 
 idrisCleanup : HasIO io => Env => io ()
-idrisCleanup = ignore $ runEitherT $ sysAndLog Build ["make", "clean"]
+idrisCleanup =
+  ignore $ runEitherT $ do
+    sysAndLog Build ["make", "clean-libs"]
+    sysAndLog Build ["rm", "-r", "build/ttc", "build/exec"]
 
 bootstrapCleanup : HasIO io => Env => Path Abs -> io ()
 bootstrapCleanup dir =

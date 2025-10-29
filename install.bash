@@ -292,6 +292,11 @@ if [ ! -f "$USER_DIR/pack.toml" ]; then
 		# Idris2 compiler is outdated.
 		# bootstrap  = true
 
+		# Whether to rebuild Idris2 after bootstrapping, using the freshly
+		# built compiler (stage-3 build). This produces a more optimized
+		# final executable, but increases total build time.
+		# bootstrap-stage3 = true
+
 		# Name or path to the scheme executable to use.
 		scheme      = "$SCHEME"
 

@@ -63,6 +63,9 @@ setScheme s _ = Right . {scheme := fromString s}
 setBootstrap : Bool -> AdjConf
 setBootstrap b _ = Right . {bootstrap := b}
 
+setBootstrapStage3 : Bool -> AdjConf
+setBootstrapStage3 b _ = Right . {bootstrapStage3 := b}
+
 setRlwrap : Maybe String -> AdjConf
 setRlwrap args _ = Right . {rlwrap := UseRlwrap $ maybe [] (\s => [NoEscape s]) args}
 
@@ -166,6 +169,16 @@ descs =
       Use the bootstrap compiler for building Idris2. This takes longer
       than without bootstrapping, but it will even work if no Idris2
       compiler or an outdated one is on the `$PATH`.
+      """
+  , MkOpt [] ["bootstrap-stage3"]   (NoArg $ setBootstrapStage3 True)
+      """
+      After bootstrapping, rebuild Idris2 using the freshly built compiler.
+      This performs a stage-3 build, producing a more optimized final executable.
+      """
+  , MkOpt [] ["no-bootstrap-stage3"]   (NoArg $ setBootstrapStage3 False)
+      """
+      Skip the stage-3 rebuild after bootstrapping. This results in a slightly
+      less optimized compiler, but reduces total build time.
       """
   , MkOpt [] ["no-bootstrap"]   (NoArg $ setBootstrap False)
       """

@@ -265,35 +265,45 @@ getTTCVersion = do
 tryDirectBuild : HasIO io => Env => io (Either PackErr ())
 tryDirectBuild =
   runEitherT $
-    sysAndLog Build ["make", "support", prefixVar, schemeVar] >>
-    sysAndLog Build ["make", "idris2-exec", prefixVar, schemeVar]
+    sysAndLog Build ["make", "support"] >>
+    sysAndLog Build ["make", "idris2-exec" , schemeVar]
 
 idrisCleanup : HasIO io => Env => io ()
-idrisCleanup =
+idrisCleanup = ignore $ runEitherT $ sysAndLog Build ["make", "clean"]
+
+bootstrapCleanup : HasIO io => Env => Path Abs -> io ()
+bootstrapCleanup dir =
   ignore $ runEitherT $ do
-    sysAndLog Build ["make", "clean-libs"]
-    sysAndLog Build ["rm", "-r", "build/ttc", "build/exec"]
+    sysAndLog Build ["make", "bootstrap-clean"]
+    sysAndLog Build ["rm", "-r", dir]
+
+bootstrapIdrisStage3 : HasIO io => (e : Env) => Path Abs -> EitherT PackErr io ()
+bootstrapIdrisStage3 dir = do
+  let prefVar = "PREFIX=\{dir}"
+  debug "Rebuilding bootstrap libraries..."
+  sysAndLog Build ["make", "bootstrap-libs", prefVar, schemeVar]
+  sysAndLog Build ["make", "bootstrap-install", prefVar, schemeVar]
+  sysAndLog Build ["make", "support"]
+  sysAndLog Build ["make", "install-support", prefVar]
+  idrisCleanup
+
+  debug "Stage 3: Rebuilding Idris..."
+  let idrisBootPath : Path Abs = dir /> "bin" /> "idris2"
+  let idrisBootVar = "IDRIS2_BOOT=\{idrisBootPath}"
+  let idrisDataPath : Path Abs = dir /> (the Body "idris2" <-> e.db.idrisVersion) /> "support"
+  let idrisDataVar = "IDRIS2_DATA=\{idrisDataPath}"
+  sysAndLog Build ["make", "idris2-exec", prefixVar, idrisBootVar, idrisDataVar, schemeVar]
+  sysAndLog Build ["make", "install-idris2", prefVar, schemeVar]
+
+  ignore $ runEitherT $ sysAndLog Build ["make", "-rf", dir]
 
 bootstrapIdris : HasIO io => (e : Env) => Path Abs -> EitherT PackErr io ()
 bootstrapIdris dir = do
   debug "Bootstrapping Idris..."
   sysAndLog Build ["make", bootstrapCmd, schemeVar]
-  if e.config.rebuildBootstrap
-     then do
-      debug "Rebuilding bootstrap libraries..."
-      sysAndLog Build ["make", "bootstrap-libs", "PREFIX=\{dir}/bootstrapped", schemeVar]
-      sysAndLog Build ["make", "bootstrap-install", "PREFIX=\{dir}/bootstrapped", schemeVar]
-      sysAndLog Build ["make", "support", "PREFIX=\{dir}/bootstrapped", schemeVar]
-      sysAndLog Build ["make", "install-support", "PREFIX=\{dir}/bootstrapped", schemeVar]
-      sysAndLog Build ["make", "clean"]
-      debug "Stage 3: Rebuilding Idris..."
-      sysAndLog Build ["make", "idris2-exec", prefixVar,
-                               "IDRIS2_BOOT=\{dir}/bootstrapped/bin/idris2",
-                               "IDRIS2_DATA=\{dir}/bootstrapped/idris2-0.7.0/support",
-                               schemeVar]
-     else pure ()
-
-  sysAndLog Build ["make", "bootstrap-clean"]
+  when e.config.rebuildBootstrap $ do
+    bootstrapIdrisStage3 $ dir </> "bootstrapped"
+  ignore $ runEitherT $ sysAndLog Build ["make", "bootstrap-clean"]
 
 ||| Builds and installs the Idris commit given in the environment.
 export covering

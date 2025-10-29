@@ -283,7 +283,6 @@ bootstrapIdrisStage3 dir = do
   debug "Rebuilding bootstrap libraries..."
   sysAndLog Build ["make", "bootstrap-libs", prefVar, schemeVar]
   sysAndLog Build ["make", "bootstrap-install", prefVar, schemeVar]
-  sysAndLog Build ["make", "support"]
   sysAndLog Build ["make", "install-support", prefVar]
   idrisCleanup
 

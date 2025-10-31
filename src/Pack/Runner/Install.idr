@@ -277,13 +277,15 @@ idrisCleanup =
 idrisBootstrapStage3 : HasIO io => (e : Env) => Path Abs -> EitherT PackErr io ()
 idrisBootstrapStage3 dir = do
   let prefVar = mkPrefixVar dir
+  let dataDir : Body = "idris2-data"
+  let nameVersionVar = mkEnvVar "NAME_VERSION" dataDir -- directory for support
   debug "Install bootstrapped Idris..."
-  sysAndLog Build ["make", "bootstrap-install", prefVar, schemeVar]
+  sysAndLog Build ["make", "bootstrap-install", prefVar, schemeVar, nameVersionVar]
   idrisCleanup
 
   debug "Stage 3: Rebuilding Idris..."
   let idrisBootVar = mkIdrisBootVar $ dir /> "bin" /> "idris2"
-  let idrisDataVar = mkIdrisDataVar $ dir /> idrisDir /> "support"
+  let idrisDataVar = mkIdrisDataVar $ dir /> dataDir /> "support"
   sysAndLog Build ["make", "idris2-exec", idrisBootVar, idrisDataVar, schemeVar]
 
   ignoreError $ sysAndLog Build ["make", "-rf", dir]

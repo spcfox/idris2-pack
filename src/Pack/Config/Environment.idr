@@ -141,7 +141,7 @@ export
 idrisExec : PackDirs => DB => File Abs
 idrisExec = MkF idrisBinDir "idris2"
 
-export %inline
+%inline
 idrisDir : (db : DB) => Body
 idrisDir = the Body "idris2" <-> db.idrisVersion
 
@@ -262,7 +262,7 @@ bootstrapCmd = if useRacket then "bootstrap-racket" else "bootstrap"
 --          Environment Variables
 --------------------------------------------------------------------------------
 
-%inline
+export %inline
 mkEnvVar : Interpolation a => String -> a -> String
 mkEnvVar var val = "\{var}=\{val}"
 

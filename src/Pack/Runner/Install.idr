@@ -276,9 +276,8 @@ idrisCleanup =
 
 idrisBootstrapStage3 : HasIO io => (e : Env) => Path Abs -> EitherT PackErr io ()
 idrisBootstrapStage3 dir = do
-  let prefVar = mkPrefixVar dir
   debug "Install bootstrapped Idris..."
-  sysAndLog Build ["make", "bootstrap-install", prefVar, schemeVar]
+  sysWithEnvAndLog Build ["make", "bootstrap-install", schemeVar] [("PREFIX", "\{dir}")]
   idrisCleanup
 
   debug "Stage 3: Rebuilding Idris..."
